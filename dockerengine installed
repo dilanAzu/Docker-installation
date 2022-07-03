@@ -1,0 +1,340 @@
+saturday 03-05:
+  Docker:
+    Areas of focus:
+      1.Quick overview of virtual machine
+      2.Quick overview of containers
+      3.virtualization vs containerization
+      4.Docker administration
+      5.Docker Networking
+      6.Docker storage management
+      7. Dockerfile
+      8.Multicontainers technology (docker-compose)
+      9.Docker on AWS (ECS)
+      10.Container Registry
+       i.Dockerhub
+       ii.Elastic Container Registry
+      11.Overview of Docker swarm
+      12. Containerized Application troubleshooting
+
+
+  Installation of dockerengine: 
+
+    script:
+#!/bin/bash
+# Run this as a script
+#Author: Elvis N.
+#Company:Etech Consulting
+echo "Welcome to Etech consulting Docker module!!"
+sleep 25
+sudo hostnamectl set-hostname dockerengine
+sudo apt update -y
+sudo apt install docker.io -y
+sudo usermod -aG docker ubuntu 
+
+# Install java as jenkins dependency
+sudo apt install openjdk-11-jdk -y
+# install jenkis in ubuntu:
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > \
+    /etc/apt/sources.list.d/jenkins.list'
+sudo apt-get update
+sudo apt-get install jenkins -y
+sudo systemctl start jenkins 
+sudo usermod -aG docker jenkins 
+echo "jenkins  ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/jenkins 
+docker --version
+sudo su - jenkins
+
+Note: the 'tee' command is use to split output into different destination files
+if you get errors about docker deamon not running do the following:
+  $ sudo find / -name docker.sock
+  $ ll <directory>/docker.sock --> use to see ownwrship
+  $ sudo chown -R $username <first detected directory>
+
+  why are we owning the /var/run/docker.sock file?
+  ans:by default this directory is own by root user and under the docker group
+
+  How does docker containers obtain their ip addresses?
+  Ans: Dockerengine has an embeded dns server responsible to assign initial ips to containers
+  How can i see this embeded dns server within my dockerhost?
+  Ans: run the below command then you will notice the classB ip dns server
+  tips: In any networking environment, the dns server must have static ip address so as not to cost ip conflicts
+  $ systemd-resolve --status
+
+  Docker directory tree:
+    /var/lib/docker/
+├── buildkit
+│   ├── cache.db
+│   ├── containerdmeta.db
+│   ├── content
+│   │   └── ingest
+│   ├── executor
+│   ├── metadata_v2.db
+│   └── snapshots.db
+├── containers
+├── image
+│   └── overlay2
+│       ├── distribution
+│       ├── imagedb
+│       │   ├── content
+│       │   │   └── sha256
+│       │   └── metadata
+│       │       └── sha256
+│       ├── layerdb
+│       └── repositories.json
+├── network
+│   └── files
+│       └── local-kv.db
+├── overlay2
+│   └── l
+├── plugins
+│   ├── storage
+│   │   └── ingest
+│   └── tmp
+├── runtimes
+├── swarm
+├── tmp
+├── trust
+└── volumes
+    ├── backingFsBlockDev
+    └── metadata.db
+
+    Most aspect to take note about a docker directory tree
+    - ausfs
+    - containers
+    - network
+    - volumes 
+  question: How did we get the above directory tree?
+  Ans: run the following
+  $ sudo apt install tree
+  $ sudo tree /var/lib/docker/
+
+  What is /var/lib/docker/ directory all about?
+   ans: Docker deamon uses this directory to monitor docker operations within the dockerhost/engine
+
+To ensure you avoid certificates Authority issues run this:
+  Update the apt package index and install packages to allow apt to use a repository over HTTPS:
+$ sudo apt-get update
+$ sudo apt-get install ca-certificates curl gnupg lsb-release
+=====================================================================================
+Every vm has a NIC(Network Interface Card)
+CNI (Container Network Interface)
+
+docker volume create etechvol1
+Generate docker api request --> docker deamon --> /var/lib/docker/volumes 
+==============================================================================================
+second half after break:
+  some docker commands:
+    docker build -t <imagename> . or Dockerfile
+    docker run (creating the image and running the container)
+    docker ps 
+    
+    
+    =============================================================================================================================
+    
+    
+    What is Docker?
+Docker is a containerisation platform which packages your app and all its dependencies
+together in the form of containers, so as to ensure that your application works
+seamlessly in any environment be it dev or test or prod.
+Docker is an open platform for developers and sysadmins to build, ship, and run
+distributed applications
+Docker is available in two editions:
+Community Edition (CE) and Enterprise Edition (EE).
+Docker Community Edition (CE) is ideal for developers and small teams looking to get
+started with Docker and experimenting with container-based apps.
+Docker Enterprise Edition (EE) is designed for enterprise development and IT teams who
+build, ship, and run business critical applications in production at scale.
+Advantages of Docker
+1. Rapid application deployment
+Containers include the minimal run time requirements of the application, reducing their
+size and allowing them to be deployed quickly.
+2. Portability across machines
+An application and all its dependencies can be bundled into a single container that is
+independent from the host version of Linux kernel, platform distribution, or deployment
+model.
+This container can be transferred to another machine that runs Docker, and executed
+there without compatibility issues.
+3. Version control and component reuse
+you can track successive versions of a container, inspect differences, or roll-back to
+previous versions. Containers reuse components from the preceding layers(base
+images), which makes them noticeably lightweight.
+1
+4. Sharing
+you can use a remote repository to share your container with others. And it is also
+possible to configure your own private repository.
+5. Lightweight footprint and minimal overhead
+Docker images are typically very small, which facilitates rapid delivery and reduces the
+time to deploy new application containers.
+Allowing for more efficient use of computing resources, both in terms of energy
+consumption and cost effectiveness.
+6. Simplified maintenance
+Docker reduces effort and risk of problems with application dependencies.
+Multiple containerized apps on a single server don’t mess up each other.
+If you update an app, you just build a new image, run fresh containers and don’t have to
+worry about other ones on the machine breaking
+Docker overview
+Docker is an open platform for developing, shipping, and running applications. Docker
+enables you to separate your applications from your infrastructure so you can deliver
+software quickly. With Docker, you can manage your infrastructure in the same ways you
+manage your applications. By taking advantage of Docker’s methodologies for shipping,
+testing, and deploying code quickly, you can significantly reduce the delay between
+writing code and running it in production.
+The Docker platform
+Docker provides the ability to package and run an application in a loosely isolated
+environment called a container. The isolation and security allows you to run many
+containers simultaneously on a given host. Containers are lightweight and contain
+everything needed to run the application, so you do not need to rely on what is currently
+installed on the host. You can easily share containers while you work, and be sure that
+everyone you share with gets the same container that works in the same way.
+Docker provides tooling and a platform to manage the lifecycle of your containers:
+Develop your application and its supporting components using containers.
+The container becomes the unit for distributing and testing your application.
+When you’re ready, deploy your application into your production environment, as a
+container or an orchestrated service. This works the same whether your production
+environment is a local data center, a cloud provider, or a hybrid of the two.
+2
+What can I use Docker for?
+Fast, consistent delivery of your applications
+Docker streamlines the development lifecycle by allowing developers to work in
+standardized environments using local containers which provide your applications and
+services. Containers are great for continuous integration and continuous delivery (CI/CD)
+workflows.
+Consider the following example scenario:
+Your developers write code locally and share their work with their colleagues using
+Docker containers.
+They use Docker to push their applications into a test environment and execute
+automated and manual tests.
+When developers find bugs, they can fix them in the development environment and
+redeploy them to the test environment for testing and validation.
+When testing is complete, getting the fix to the customer is as simple as pushing the
+updated image to the production environment.
+Responsive deployment and scaling
+Docker’s container-based platform allows for highly portable workloads. Docker
+containers can run on a developer’s local laptop, on physical or virtual machines in a
+data center, on cloud providers, or in a mixture of environments.
+Docker’s portability and lightweight nature also make it easy to dynamically manage
+workloads, scaling up or tearing down applications and services as business needs
+dictate, in near real time.
+Running more workloads on the same hardware
+Docker is lightweight and fast. It provides a viable, cost-effective alternative to
+hypervisor-based virtual machines, so you can use more of your compute capacity to
+achieve your business goals. Docker is perfect for high density environments and for
+small and medium deployments where you need to do more with fewer resources.
+Docker architecture:
+Docker uses a client-server architecture. The Docker client talks to the Docker daemon,
+which does the heavy lifting of building, running, and distributing your Docker
+containers. The Docker client and daemon can run on the same system, or you can
+connect a Docker client to a remote Docker daemon. The Docker client and daemon
+communicate using a REST API, over UNIX sockets or a network interface. Another
+3
+Docker client is Docker Compose, which lets you work with applications consisting of a
+set of containers.
+The Docker daemon
+The Docker daemon (dockerd) listens for Docker API requests and manages Docker
+objects such as images, containers, networks, and volumes. A daemon can also
+communicate with other daemons to manage Docker services.
+The Docker client
+The Docker client (docker) is the primary way that many Docker users interact with
+Docker. When you use commands such as docker run, the client sends these commands
+to dockerd, which carries them out. The docker command uses the Docker API. The
+Docker client can communicate with more than one daemon.
+Docker Desktop
+Docker Desktop is an easy-to-install application for your Mac or Windows environment
+that enables you to build and share containerized applications and microservices.
+Docker Desktop includes the Docker daemon (dockerd), the Docker client (docker),
+Docker Compose, Docker Content Trust, Kubernetes, and Credential Helper. For more
+information, see Docker Desktop.
+Docker registries
+4
+A Docker registry stores Docker images. Docker Hub is a public registry that anyone can
+use, and Docker is configured to look for images on Docker Hub by default. You can even
+run your own private registry.
+When you use the docker pull or docker run commands, the required images are pulled
+from your configured registry. When you use the docker push command, your image is
+pushed to your configured registry.
+Docker objects
+When you use Docker, you are creating and using images, containers, networks,
+volumes, plugins, and other objects. This section is a brief overview of some of those
+objects.
+Images
+An image is a read-only template with instructions for creating a Docker container.
+Containers
+A container is a runnable instance of an image. You can create, start, stop, move, or
+delete a container using the Docker API or CLI.
+Docker Commands You Should Know
+First, we’ll look at commands for images and containers. Volumes will be covered in the
+next article.
+1. how to search a docker image in hub.docker.com
+docker search httpd
+2. Download a docker image from hub.docker.com
+docker image pull <image_name>:<image_version/tag>
+3. List out docker images from your local system
+docker image ls
+4. Create/run/start a docker container from image
+docker run -d --name <container_Name> <image_name>:<image_version/tag>
+d - run your container in the background (detached)
+5. Expose your application to host server
+docker run -d -p <host_port>:<container_port> --name <container_Name>
+<image_name>:<Image_version/tag>
+docker run -d --name httpd_server -p 8080:80 httpd:2.2
+5
+6. List out running containers
+docker ps
+7. List out all docker containers (running, stopped, terminated, etc...)
+docker ps -a
+run an OS based container which interactive mode (nothing but login to container after
+it is up and running)
+docker run -i -t --name centos_server centos:latest
+i - interactive
+t - Terminal
+8. Stop a container
+docker stop <container_id>
+9. Start a container which is in stopped or exit state
+docker start <container_id>
+10.Remove a container
+docker rm <container_id>
+11.login to a docker container
+docker exec -it <container_Name> /bin/bash
+
+=====================================================================================================================================
+
+Docker ID account
+
+Your free Docker ID grants you access to Docker Hub repositories and some beta programs. All you need is an email address.
+
+Register for a Docker ID
+
+Your Docker ID becomes your user namespace for hosted Docker services, and becomes your username on the Docker forums. To create a new Docker ID:
+
+1. Go to the Docker Hub signup page by typing dockerhub signup in your browser.
+
+2. Enter a username that will become your Docker ID.
+
+Your Docker ID must be between 4 and 30 characters long, and can only contain numbers and lowercase letters. Once you create your Docker ID you cannot reuse it in the future if you deactivate this account.
+
+3. Enter a unique, valid email address.
+
+4. Enter a password that is at least 9 characters.
+
+5. Complete the Captcha verification and then then click Sign up.
+
+Docker sends a verification email to the address you provided.
+
+6. Verify your email address to complete the registration process.
+
+Note:
+You have limited actions available until you verify your email address.
+
+Log in:
+Once you register and verify your Docker ID email address, you can log in to Docker Hub.
+You can also log in through the CLI using the docker login command. For more information, see docker login.
+Warning: When you use the docker login command, your credentials are stored in your home directory in .docker/config.json. The password is base64-encoded in this file.
+
+
+
+================================================================================================================================================================
+
+
+
+
